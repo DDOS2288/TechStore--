@@ -1,8 +1,3 @@
-// seed.js
-// Скрипт наполняет Firestore тестовыми категориями и товарами для TechStore.
-// Использует Firebase Admin SDK — работает в обход Security Rules,
-// поэтому подходит для одноразового наполнения базы данными.
-
 const admin = require("firebase-admin");
 const serviceAccount = require("./serviceAccountKey.json");
 
@@ -12,7 +7,6 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-// ---------- КАТЕГОРИИ ----------
 const categories = [
   { id: "smartphones", name: "Смартфоны", slug: "smartphones" },
   { id: "laptops", name: "Ноутбуки", slug: "laptops" },
@@ -20,10 +14,7 @@ const categories = [
   { id: "tablets", name: "Планшеты", slug: "tablets" },
 ];
 
-// ---------- ТОВАРЫ ----------
-// specs у каждой категории свои — это пригодится для страницы сравнения
 const products = [
-  // Смартфоны
   {
     name: "iPhone 15",
     description: "Смартфон Apple с чипом A16 Bionic и камерой 48 Мп",
@@ -72,8 +63,6 @@ const products = [
     reviewsCount: 0,
     inStock: false,
   },
-
-  // Ноутбуки
   {
     name: "MacBook Air M2",
     description: "Лёгкий и производительный ноутбук Apple",
@@ -122,8 +111,6 @@ const products = [
     reviewsCount: 0,
     inStock: true,
   },
-
-  // Наушники
   {
     name: "AirPods Pro 2",
     description: "Беспроводные наушники с активным шумоподавлением",
@@ -160,8 +147,6 @@ const products = [
     reviewsCount: 0,
     inStock: true,
   },
-
-  // Планшеты
   {
     name: "iPad Air",
     description: "Планшет Apple с чипом M1",
@@ -191,7 +176,6 @@ const products = [
 async function seed() {
   console.log("Начинаю наполнение базы...");
 
-  // 1. Категории
   const catBatch = db.batch();
   categories.forEach((cat) => {
     const ref = db.collection("categories").doc(cat.id);
@@ -200,7 +184,6 @@ async function seed() {
   await catBatch.commit();
   console.log(`✅ Добавлено категорий: ${categories.length}`);
 
-  // 2. Товары (пишем по одному, чтобы получить сгенерированные ID и создать keywords для поиска)
   let count = 0;
   for (const product of products) {
     const keywords = product.name
@@ -210,7 +193,7 @@ async function seed() {
 
     await db.collection("products").add({
       ...product,
-      keywords, // пригодится для простого поиска по Firestore (array-contains)
+      keywords,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
     count++;
@@ -224,4 +207,5 @@ async function seed() {
 seed().catch((err) => {
   console.error("❌ Ошибка при наполнении базы:", err);
   process.exit(1);
-});
+}
+);

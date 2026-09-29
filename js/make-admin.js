@@ -1,11 +1,3 @@
-// make-admin.js
-// Назначает role: "admin" пользователю по email.
-// Использует тот же serviceAccountKey.json, что и seed.js — положите
-// этот файл в ту же папку techstore-seed.
-//
-// Запуск:
-//   node make-admin.js your@email.com
-
 const admin = require("firebase-admin");
 const serviceAccount = require("./serviceAccountKey.json");
 
@@ -31,10 +23,6 @@ async function makeAdmin() {
     process.exit(0);
   } catch (err) {
     console.error("❌ Ошибка:", err.message);
-    console.error(
-      "Убедитесь, что: 1) пользователь уже зарегистрирован через register.html, " +
-        "2) email указан правильно."
-    );
     process.exit(1);
   }
 }
