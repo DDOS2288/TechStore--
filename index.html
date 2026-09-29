@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>TechStore — магазин электроники</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<script>
+  function showJsError(msg) {
+    var el = document.createElement("div");
+    el.style.cssText =
+      "background:#fee2e2;color:#991b1b;padding:12px;margin:12px;border:1px solid #991b1b;border-radius:6px;font-family:monospace;font-size:0.85rem;white-space:pre-wrap;";
+    el.textContent = "⚠ Ошибка JS: " + msg;
+    document.body.insertBefore(el, document.body.firstChild);
+  }
+  window.addEventListener("error", function (e) {
+    showJsError(e.message + (e.filename ? " (" + e.filename + ":" + e.lineno + ")" : ""));
+  });
+  window.addEventListener("unhandledrejection", function (e) {
+    showJsError((e.reason && e.reason.message) || String(e.reason));
+  });
+  if (window.location.protocol === "file:") {
+    showJsError(
+      "Страница открыта напрямую как файл (file://). Модули JS не будут работать. Запустите локальный сервер — см. README."
+    );
+  }
+</script>
+
+
+<header>
+  <a class="logo" href="index.html">TechStore</a>
+  <nav id="nav"></nav>
+</header>
+
+<main>
+  <h1>Каталог товаров</h1>
+
+  <div class="filters">
+    <input type="text" id="searchInput" placeholder="Поиск по названию..." />
+
+    <select id="categoryFilter">
+      <option value="">Все категории</option>
+    </select>
+
+    <select id="sortSelect">
+      <option value="createdAt_desc">Сначала новые</option>
+      <option value="price_asc">Цена: по возрастанию</option>
+      <option value="price_desc">Цена: по убыванию</option>
+      <option value="rating_desc">По рейтингу</option>
+    </select>
+  </div>
+
+  <p id="emptyMsg" class="hidden">Ничего не найдено.</p>
+
+  <div id="productGrid" class="product-grid"></div>
+
+  <button id="loadMoreBtn" class="secondary hidden">Показать ещё</button>
+</main>
+
+<script type="module">
+  import { watchAuthState, logoutUser } from "./js/auth.js";
+
+  const nav = document.getElementById("nav");
+
+  watchAuthState((user, profile) => {
+    if (!user) {
+      nav.innerHTML = `<a href="login.html">Вход</a><a href="register.html">Регистрация</a>`;
+      return;
+    }
+
+    const adminLink = profile?.role === "admin" ? `<a href="admin.html">Админ-панель</a>` : "";
+    nav.innerHTML = `
+      <a href="cart.html">Корзина</a>
+      <a href="profile.html">Личный кабинет</a>
+      ${adminLink}
+      <a href="#" id="logoutLink">Выйти</a>
+    `;
+
+    document.getElementById("logoutLink").addEventListener("click", async (e) => {
+      e.preventDefault();
+      await logoutUser();
+      window.location.reload();
+    });
+  });
+</script>
+
+<script type="module" src="js/catalog.js"></script>
+<script src="js/matrix.js"></script>
+
+</body>
+</html>
+
+

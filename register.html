@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>Регистрация — TechStore</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<script>
+  function showJsError(msg) {
+    var el = document.createElement("div");
+    el.style.cssText =
+      "background:#fee2e2;color:#991b1b;padding:12px;margin:12px;border:1px solid #991b1b;border-radius:6px;font-family:monospace;font-size:0.85rem;white-space:pre-wrap;";
+    el.textContent = "⚠ Ошибка JS: " + msg;
+    document.body.insertBefore(el, document.body.firstChild);
+  }
+  window.addEventListener("error", function (e) {
+    showJsError(e.message + (e.filename ? " (" + e.filename + ":" + e.lineno + ")" : ""));
+  });
+  window.addEventListener("unhandledrejection", function (e) {
+    showJsError((e.reason && e.reason.message) || String(e.reason));
+  });
+  if (window.location.protocol === "file:") {
+    showJsError(
+      "Страница открыта напрямую как файл (file://). Модули JS не будут работать. Запустите локальный сервер — см. README."
+    );
+  }
+</script>
+
+
+<header>
+  <a class="logo" href="index.html">TechStore</a>
+  <nav>
+    <a href="index.html">Каталог</a>
+    <a href="login.html">Вход</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Регистрация</h1>
+  <div class="card">
+    <form id="registerForm">
+      <label for="name">Имя</label>
+      <input type="text" id="name" required />
+
+      <label for="email">Email</label>
+      <input type="email" id="email" required />
+
+      <label for="password">Пароль (мин. 6 символов)</label>
+      <input type="password" id="password" required minlength="6" />
+
+      <button type="submit">Зарегистрироваться</button>
+      <p id="message"></p>
+    </form>
+    <p class="small-link">Уже есть аккаунт? <a href="login.html">Войти</a></p>
+  </div>
+</main>
+
+<script type="module">
+  import { registerUser, friendlyAuthError } from "./js/auth.js";
+
+  const form = document.getElementById("registerForm");
+  const message = document.getElementById("message");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    message.textContent = "";
+    message.className = "";
+
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    try {
+      await registerUser(name, email, password);
+      message.textContent = "Регистрация успешна! Переход в личный кабинет...";
+      message.className = "success";
+      setTimeout(() => (window.location.href = "profile.html"), 1000);
+    } catch (err) {
+      message.textContent = friendlyAuthError(err);
+      message.className = "error";
+    }
+  });
+</script>
+
+<script src="js/matrix.js"></script>
+</body>
+</html>

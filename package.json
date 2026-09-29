@@ -1,0 +1,12 @@
+{
+  "name": "techstore-seed",
+  "version": "1.0.0",
+  "description": "Скрипт наполнения Firestore тестовыми данными для TechStore",
+  "main": "seed.js",
+  "scripts": {
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  }
+}

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>Корзина — TechStore</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<script>
+  function showJsError(msg) {
+    var el = document.createElement("div");
+    el.style.cssText =
+      "background:#fee2e2;color:#991b1b;padding:12px;margin:12px;border:1px solid #991b1b;border-radius:6px;font-family:monospace;font-size:0.85rem;white-space:pre-wrap;";
+    el.textContent = "⚠ Ошибка JS: " + msg;
+    document.body.insertBefore(el, document.body.firstChild);
+  }
+  window.addEventListener("error", function (e) {
+    showJsError(e.message + (e.filename ? " (" + e.filename + ":" + e.lineno + ")" : ""));
+  });
+  window.addEventListener("unhandledrejection", function (e) {
+    showJsError((e.reason && e.reason.message) || String(e.reason));
+  });
+  if (window.location.protocol === "file:") {
+    showJsError(
+      "Страница открыта напрямую как файл (file://). Модули JS не будут работать. Запустите локальный сервер — см. README."
+    );
+  }
+</script>
+
+<header>
+  <a class="logo" href="index.html">TechStore</a>
+  <nav id="nav"></nav>
+</header>
+
+<main>
+  <h1>Корзина</h1>
+
+  <div id="guestBlock" class="card hidden">
+    <p>Чтобы посмотреть корзину, нужно войти.</p>
+    <a href="login.html">Войти</a>
+  </div>
+
+  <div id="emptyCartMsg" class="card hidden">
+    <p>Корзина пуста.</p>
+    <a href="index.html">Перейти в каталог</a>
+  </div>
+
+  <div id="cartItems"></div>
+
+  <div id="cartFooter" class="card hidden">
+    <p>Итого: <strong id="cartTotal"></strong></p>
+    <button id="checkoutBtn">Оформить заказ</button>
+    <p id="checkoutMessage"></p>
+  </div>
+</main>
+
+<script type="module">
+  import { watchAuthState, logoutUser } from "./js/auth.js";
+  import { getCart, updateQty, removeFromCart, checkout } from "./js/cart.js";
+
+  const nav = document.getElementById("nav");
+  const guestBlock = document.getElementById("guestBlock");
+  const emptyCartMsg = document.getElementById("emptyCartMsg");
+  const cartItemsEl = document.getElementById("cartItems");
+  const cartFooter = document.getElementById("cartFooter");
+  const cartTotal = document.getElementById("cartTotal");
+  const checkoutBtn = document.getElementById("checkoutBtn");
+  const checkoutMessage = document.getElementById("checkoutMessage");
+
+  let currentUid = null;
+
+  watchAuthState((user, profile) => {
+    if (!user) {
+      guestBlock.classList.remove("hidden");
+      nav.innerHTML = `<a href="login.html">Вход</a><a href="register.html">Регистрация</a>`;
+      return;
+    }
+
+    currentUid = user.uid;
+    const adminLink = profile?.role === "admin" ? `<a href="admin.html">Админ-панель</a>` : "";
+    nav.innerHTML = `<a href="index.html">Каталог</a><a href="profile.html">Личный кабинет</a>${adminLink}<a href="#" id="logoutLink">Выйти</a>`;
+    document.getElementById("logoutLink").addEventListener("click", async (e) => {
+      e.preventDefault();
+      await logoutUser();
+      window.location.reload();
+    });
+
+    renderCart();
+  });
+
+  async function renderCart() {
+    const items = await getCart(currentUid);
+    cartItemsEl.innerHTML = "";
+
+    if (!items.length) {
+      emptyCartMsg.classList.remove("hidden");
+      cartFooter.classList.add("hidden");
+      return;
+    }
+
+    emptyCartMsg.classList.add("hidden");
+    cartFooter.classList.remove("hidden");
+
+    let total = 0;
+
+    items.forEach((item) => {
+      total += item.price * item.qty;
+
+      const row = document.createElement("div");
+      row.className = "card cart-row";
+      row.innerHTML = `
+        <img src="${item.image || "https://placehold.co/80x80?text=No+Image"}" alt="${item.name}" />
+        <div class="cart-row-info">
+          <p><strong>${item.name}</strong></p>
+          <p>${item.price.toLocaleString("ru-RU")} ₸ × 
+            <input type="number" min="0" value="${item.qty}" class="qtyInput" data-id="${item.productId}" style="width:60px;" />
+          </p>
+        </div>
+        <button class="secondary removeBtn" data-id="${item.productId}">Удалить</button>
+      `;
+      cartItemsEl.appendChild(row);
+    });
+
+    cartTotal.textContent = total.toLocaleString("ru-RU") + " ₸";
+
+    document.querySelectorAll(".qtyInput").forEach((input) => {
+      input.addEventListener("change", async () => {
+        const qty = parseInt(input.value, 10) || 0;
+        await updateQty(currentUid, input.dataset.id, qty);
+        renderCart();
+      });
+    });
+
+    document.querySelectorAll(".removeBtn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        await removeFromCart(currentUid, btn.dataset.id);
+        renderCart();
+      });
+    });
+  }
+
+  checkoutBtn.addEventListener("click", async () => {
+    checkoutMessage.textContent = "";
+    checkoutMessage.className = "";
+    try {
+      const items = await getCart(currentUid);
+      const orderId = await checkout(currentUid, items);
+      checkoutMessage.textContent = "Заказ оформлен! Номер заказа: " + orderId;
+      checkoutMessage.className = "success";
+      renderCart();
+    } catch (err) {
+      checkoutMessage.textContent = "Ошибка: " + err.message;
+      checkoutMessage.className = "error";
+    }
+  });
+</script>
+
+<script src="js/matrix.js"></script>
+</body>
+</html>

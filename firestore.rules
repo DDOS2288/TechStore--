@@ -1,0 +1,68 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    }
+
+    // ---------- USERS ----------
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      // Пользователь может создать/обновлять свой документ, но НЕ может сам себе
+      // назначить role. Менять роль может только admin.
+      allow create: if isOwner(userId) && request.resource.data.role == "user";
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ---------- CATEGORIES ----------
+    match /categories/{categoryId} {
+      allow read: if true; // каталог публичный
+      allow write: if isAdmin();
+    }
+
+    // ---------- PRODUCTS ----------
+    match /products/{productId} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      // update нужен обычным пользователям для обновления rating/reviewsCount при отзыве
+      allow update: if isAdmin() || isSignedIn();
+    }
+
+    // ---------- REVIEWS ----------
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // ---------- ORDERS ----------
+    match /orders/{orderId} {
+      allow read: if isSignedIn() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      // Менять статус заказа может только admin; пользователь свой заказ не редактирует
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ---------- CARTS ----------
+    // Документ id корзины = uid пользователя
+    match /carts/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+  }
+}
