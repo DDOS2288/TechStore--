@@ -57,14 +57,12 @@
       <table id="specsTable"></table>
     </div>
 
-    <!-- ОТЗЫВЫ -->
     <div class="card" id="reviewsSection">
       <h2>Отзывы</h2>
 
       <div id="reviewsList"></div>
       <p id="reviewsEmpty" class="hidden">Отзывов пока нет. Будьте первым!</p>
 
-      <!-- Форма только для авторизованных -->
       <div id="reviewFormBlock" class="hidden">
         <h3>Оставить отзыв</h3>
         <form id="reviewForm">
@@ -104,6 +102,7 @@
     limit,
     getDocs,
     serverTimestamp,
+    runTransaction,
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const nav = document.getElementById("nav");
@@ -128,7 +127,6 @@
       window.location.reload();
     });
 
-    // Показываем форму только если пользователь купил этот товар
     if (productId) {
       const hasBought = await checkPurchased(user.uid, productId);
       if (hasBought) {
@@ -141,7 +139,6 @@
     }
   });
 
-  // Проверяем есть ли этот товар в заказах пользователя
   async function checkPurchased(uid, pid) {
     const q = query(collection(db, "orders"), where("userId", "==", uid));
     const snap = await getDocs(q);
@@ -155,7 +152,6 @@
   const params = new URLSearchParams(window.location.search);
   const productId = params.get("id");
 
-  // ---------- КАРТИНКИ (та же таблица что в catalog.js) ----------
   const PRODUCT_IMAGES = {
     "iphone 15":          "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400&h=400&fit=crop&q=85",
     "samsung galaxy s24": "https://images.unsplash.com/photo-1610945264803-c22b62d2a7b3?w=400&h=400&fit=crop&q=85",
@@ -220,7 +216,6 @@
       addBtn.textContent = "Нет в наличии";
     }
 
-    // Характеристики
     const table = document.getElementById("specsTable");
     Object.entries(data.specs || {}).forEach(([key, value]) => {
       const row = document.createElement("tr");
@@ -270,7 +265,6 @@
     });
   }
 
-  // ---------- ОТЗЫВЫ: ЗАГРУЗКА ----------
   async function loadReviews() {
     const list = document.getElementById("reviewsList");
     const empty = document.getElementById("reviewsEmpty");
@@ -319,7 +313,6 @@
     });
   }
 
-  // ---------- ОТЗЫВЫ: УДАЛЕНИЕ ----------
   async function deleteReview(reviewId) {
     try {
       const reviewSnap = await getDoc(doc(db, "reviews", reviewId));
@@ -355,7 +348,6 @@
       "★ " + (d.rating?.toFixed(1) || "—") + " (" + (d.reviewsCount || 0) + " отзывов)";
   }
 
-  // ---------- ЗВЁЗДОЧКИ ----------
   const starSpans = document.querySelectorAll("#starPicker span");
   let selectedRating = 0;
 
@@ -376,7 +368,6 @@
     });
   }
 
-  // ---------- ОТЗЫВЫ: ДОБАВЛЕНИЕ ----------
   document.getElementById("reviewForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const msg = document.getElementById("reviewMsg");
