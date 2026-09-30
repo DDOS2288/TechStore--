@@ -1,4 +1,5 @@
 import { loginUser, resetPassword, friendlyAuthError } from "./firebase/auth.js";
+import { showToast } from "./toast.js";
 
 const form = document.getElementById("loginForm");
 const message = document.getElementById("message");
@@ -16,10 +17,13 @@ form.addEventListener("submit", async (e) => {
     await loginUser(email, password);
     message.textContent = "Вход выполнен! Переход в личный кабинет...";
     message.className = "success";
+    showToast("Успешный вход в аккаунт!", "success");
     setTimeout(() => (window.location.href = "profile.html"), 800);
   } catch (err) {
-    message.textContent = friendlyAuthError(err);
+    const errorText = friendlyAuthError(err);
+    message.textContent = errorText;
     message.className = "error";
+    showToast(errorText, "error");
   }
 });
 
@@ -27,16 +31,22 @@ resetLink.addEventListener("click", async (e) => {
   e.preventDefault();
   const email = document.getElementById("email").value.trim();
   if (!email) {
-    message.textContent = "Введите email в поле выше, затем нажмите «Восстановить»";
+    const txt = "Введите email в поле выше, затем нажмите «Восстановить»";
+    message.textContent = txt;
     message.className = "error";
+    showToast(txt, "warn");
     return;
   }
   try {
     await resetPassword(email);
-    message.textContent = "Письмо для сброса пароля отправлено на " + email;
+    const txt = "Письмо для сброса пароля отправлено на " + email;
+    message.textContent = txt;
     message.className = "success";
+    showToast(txt, "success");
   } catch (err) {
-    message.textContent = friendlyAuthError(err);
+    const errorText = friendlyAuthError(err);
+    message.textContent = errorText;
     message.className = "error";
+    showToast(errorText, "error");
   }
 });

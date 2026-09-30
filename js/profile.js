@@ -1,5 +1,6 @@
 import { db } from "./firebase/firebase-config.js";
 import { watchAuthState, logoutUser } from "./firebase/auth.js";
+import { showToast } from "./toast.js";
 import {
   doc,
   setDoc,
@@ -128,9 +129,11 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
     await setDoc(doc(db, "users", currentUid), { name, phone, role: currentRole }, { merge: true });
     message.textContent = "Данные сохранены";
     message.className = "success";
+    showToast("Профиль успешно обновлён!", "success");
   } catch (err) {
     message.textContent = "Ошибка: " + err.message + " | uid=" + currentUid + " | role=" + currentRole;
     message.className = "error";
+    showToast("Ошибка: " + err.message, "error");
   }
 });
 

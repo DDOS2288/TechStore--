@@ -1,5 +1,6 @@
 import { watchAuthState, logoutUser } from "./firebase/auth.js";
 import { getCart, updateQty, removeFromCart, checkout } from "./firebase/cart.js";
+import { showToast } from "./toast.js";
 
 const nav = document.getElementById("nav");
 const guestBlock = document.getElementById("guestBlock");
@@ -88,11 +89,14 @@ checkoutBtn.addEventListener("click", async () => {
   try {
     const items = await getCart(currentUid);
     const orderId = await checkout(currentUid, items);
-    checkoutMessage.textContent = "Заказ оформлен! Номер заказа: " + orderId;
+    const msg = "Заказ оформлен! Номер заказа: #" + orderId.slice(0, 8);
+    checkoutMessage.textContent = msg;
     checkoutMessage.className = "success";
+    showToast(msg, "success");
     renderCart();
   } catch (err) {
     checkoutMessage.textContent = "Ошибка: " + err.message;
     checkoutMessage.className = "error";
+    showToast("Ошибка: " + err.message, "error");
   }
 });

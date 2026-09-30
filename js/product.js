@@ -1,6 +1,7 @@
 import { db } from "./firebase/firebase-config.js";
 import { watchAuthState, logoutUser } from "./firebase/auth.js";
 import { addToCart } from "./firebase/cart.js";
+import { showToast } from "./toast.js";
 import {
   doc,
   getDoc,
@@ -142,15 +143,18 @@ async function loadProduct() {
     if (!currentUid) {
       cartMessage.textContent = "Чтобы добавить в корзину, сначала войдите в аккаунт.";
       cartMessage.className = "error";
+      showToast("Сначала войдите в аккаунт", "error");
       return;
     }
     try {
       await addToCart(currentUid, productId, data, 1);
       cartMessage.textContent = "Добавлено в корзину!";
       cartMessage.className = "success";
+      showToast("Товар добавлен в корзину!", "success");
     } catch (err) {
       cartMessage.textContent = "Ошибка: " + err.message;
       cartMessage.className = "error";
+      showToast("Ошибка добавления: " + err.message, "error");
     }
   });
 }
@@ -246,8 +250,9 @@ async function deleteReview(reviewId) {
 
     refreshRating();
     loadReviews();
+    showToast("Отзыв удалён", "warn");
   } catch (err) {
-    alert("Ошибка удаления: " + err.message);
+    showToast("Ошибка удаления: " + err.message, "error");
   }
 }
 
@@ -286,17 +291,20 @@ document.getElementById("reviewForm").addEventListener("submit", async (e) => {
   if (!currentUid) {
     msg.textContent = "Необходимо войти в аккаунт.";
     msg.className = "error";
+    showToast("Необходимо войти в аккаунт", "error");
     return;
   }
   if (selectedRating === 0) {
     msg.textContent = "Выберите оценку (звёздочки).";
     msg.className = "error";
+    showToast("Выберите оценку (звёздочки)", "warn");
     return;
   }
   const text = document.getElementById("reviewText").value.trim();
   if (!text) {
     msg.textContent = "Напишите комментарий.";
     msg.className = "error";
+    showToast("Напишите комментарий", "warn");
     return;
   }
 
@@ -329,12 +337,14 @@ document.getElementById("reviewForm").addEventListener("submit", async (e) => {
     document.getElementById("reviewRating").value = 0;
     msg.textContent = "Отзыв добавлен!";
     msg.className = "success";
+    showToast("Отзыв успешно добавлен!", "success");
 
     refreshRating();
     loadReviews();
   } catch (err) {
     msg.textContent = "Ошибка: " + err.message;
     msg.className = "error";
+    showToast("Ошибка: " + err.message, "error");
   }
 });
 

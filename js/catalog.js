@@ -1,5 +1,6 @@
 import { db } from "./firebase/firebase-config.js";
 import { watchAuthState, logoutUser } from "./firebase/auth.js";
+import { showToast } from "./toast.js";
 import {
   collection,
   query,
@@ -207,35 +208,7 @@ async function searchAndRender(rawQuery) {
   filtered.forEach(p => renderProduct(p.id, p));
 }
 
-function showToast(msg, type = "warn") {
-  document.getElementById("hackToast")?.remove();
-  const toast = document.createElement("div");
-  toast.id = "hackToast";
-  const color = type === "error" ? "#ff3030" : "#00ff41";
-  const bg    = type === "error" ? "rgba(40,0,0,0.95)" : "rgba(0,25,0,0.95)";
-  toast.style.cssText = [
-    "position:fixed", "top:80px", "right:20px", "z-index:9999",
-    `background:${bg}`, `border:1px solid ${color}`, `color:${color}`,
-    "padding:12px 20px", "border-radius:6px",
-    "font-family:'Share Tech Mono',monospace",
-    "font-size:0.88rem", "max-width:300px",
-    `box-shadow:0 0 18px ${color}55`,
-    "opacity:0", "transform:translateX(20px)",
-    "transition:opacity 0.25s,transform 0.25s",
-    "pointer-events:none"
-  ].join(";");
-  toast.textContent = "> " + msg;
-  document.body.appendChild(toast);
-  requestAnimationFrame(() => {
-    toast.style.opacity = "1";
-    toast.style.transform = "translateX(0)";
-  });
-  setTimeout(() => {
-    toast.style.opacity = "0";
-    toast.style.transform = "translateX(20px)";
-    setTimeout(() => toast.remove(), 280);
-  }, 3000);
-}
+
 
 function getCompare() {
   return JSON.parse(localStorage.getItem("compareIds") || "[]");

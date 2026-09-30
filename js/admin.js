@@ -1,5 +1,6 @@
 import { db } from "./firebase/firebase-config.js";
 import { watchAuthState, logoutUser } from "./firebase/auth.js";
+import { showToast } from "./toast.js";
 import {
   collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc,
   query, orderBy, serverTimestamp,
@@ -91,6 +92,7 @@ async function loadOrders() {
   tbody.querySelectorAll(".order-status-select").forEach((sel) => {
     sel.addEventListener("change", async () => {
       await updateDoc(doc(db, "orders", sel.dataset.id), { status: sel.value });
+      showToast("Статус заказа #" + sel.dataset.id.slice(0, 8) + " изменён", "success");
     });
   });
 }
@@ -159,6 +161,7 @@ async function loadProducts() {
     btn.addEventListener("click", async () => {
       if (!confirm("Удалить товар?")) return;
       await deleteDoc(doc(db, "products", btn.dataset.id));
+      showToast("Товар удалён", "warn");
       loadProducts();
       loadMetrics();
     });
@@ -214,12 +217,14 @@ document.getElementById("productForm").addEventListener("submit", async (e) => {
     if (editingProductId) {
       await updateDoc(doc(db, "products", editingProductId), data);
       msg.textContent = "Товар обновлён";
+      showToast("Товар успешно обновлён!", "success");
     } else {
       data.rating = 0;
       data.reviewsCount = 0;
       data.createdAt = serverTimestamp();
       await addDoc(collection(db, "products"), data);
       msg.textContent = "Товар добавлен";
+      showToast("Товар успешно добавлен!", "success");
     }
     msg.className = "success";
     document.getElementById("pStockDisplay").textContent = `${newStock} шт.`;
@@ -231,6 +236,7 @@ document.getElementById("productForm").addEventListener("submit", async (e) => {
   } catch (err) {
     msg.textContent = "Ошибка: " + err.message;
     msg.className = "error";
+    showToast("Ошибка: " + err.message, "error");
   }
 });
 
@@ -266,6 +272,7 @@ async function loadUsers() {
         loadUsers(); return;
       }
       await updateDoc(doc(db, "users", sel.dataset.id), { role: sel.value });
+      showToast("Роль пользователя обновлена!", "success");
     });
   });
 }
@@ -297,6 +304,7 @@ async function loadReviews() {
     btn.addEventListener("click", async () => {
       if (!confirm("Удалить отзыв?")) return;
       await deleteDoc(doc(db, "reviews", btn.dataset.id));
+      showToast("Отзыв удалён!", "warn");
       loadReviews();
       loadMetrics();
     });
