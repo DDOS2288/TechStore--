@@ -1,6 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════
-   TechStore — Hacker Green Theme
-   ═══════════════════════════════════════════════════════════════ */
+
+
 
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
 
@@ -21,7 +20,6 @@
   --radius:      6px;
 }
 
-/* ── BASE ─────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
 html { scroll-behavior: smooth; }
@@ -35,7 +33,6 @@ body {
   min-height: 100vh;
 }
 
-/* Весь контент поверх canvas */
 main, footer, section, aside { position: relative; z-index: 1; }
 
 a { color: var(--primary-dim); text-decoration: none; }
@@ -51,7 +48,6 @@ h1 { font-size: 1.6rem; margin-bottom: 16px; }
 h2 { font-size: 1.2rem; margin-bottom: 12px; }
 h3 { font-size: 1rem; margin: 0 0 6px; }
 
-/* ── HEADER — STICKY ──────────────────────────────────────────── */
 header {
   position: sticky;
   top: 0;
@@ -93,14 +89,12 @@ nav a:hover {
   text-shadow: 0 0 8px var(--glow);
 }
 
-/* ── MAIN ─────────────────────────────────────────────────────── */
 main {
   max-width: 960px;
   margin: 0 auto;
   padding: 28px 24px;
 }
 
-/* ── CARD ─────────────────────────────────────────────────────── */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -115,7 +109,6 @@ main {
   box-shadow: 0 0 18px rgba(0,255,65,0.07);
 }
 
-/* ── FORMS ────────────────────────────────────────────────────── */
 form {
   display: flex;
   flex-direction: column;
@@ -146,7 +139,6 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 10px rgba(0,255,65,0.2);
 }
 
-/* ── BUTTONS ──────────────────────────────────────────────────── */
 button {
   padding: 9px 18px;
   background: transparent;
@@ -183,7 +175,6 @@ button.secondary:hover {
   box-shadow: none;
 }
 
-/* ── STATUS MESSAGES ──────────────────────────────────────────── */
 .error   { color: var(--danger); font-size: 0.88rem; }
 .success { color: var(--primary); font-size: 0.88rem; text-shadow: 0 0 6px var(--glow); }
 .hidden  { display: none !important; }
@@ -196,7 +187,6 @@ button.secondary:hover {
 }
 .small-link:hover { color: var(--primary); }
 
-/* ── PRICE ────────────────────────────────────────────────────── */
 .price {
   font-family: 'Orbitron', monospace;
   color: var(--primary);
@@ -204,14 +194,12 @@ button.secondary:hover {
   text-shadow: 0 0 8px var(--glow);
 }
 
-/* ── STATUS BADGES (orders) ───────────────────────────────────── */
 .status-done        { color: var(--primary); }
 .status-cancelled   { color: var(--danger); }
 .status-processing  { color: var(--warn); }
 
-/* ═══════════════════════════════════════════════════════════════
-   CATALOG
-   ═══════════════════════════════════════════════════════════════ */
+
+
 .filters {
   display: flex;
   gap: 10px;
@@ -270,7 +258,6 @@ button.secondary:hover {
 .out-of-stock  { color: var(--danger);      font-size: 0.8rem; margin: 2px 0; }
 .in-stock-badge { color: var(--primary-dim); font-size: 0.8rem; margin: 2px 0; }
 
-/* Кнопка "Сравнить" */
 .compare-btn {
   margin-top: 5px;
   padding: 5px 8px;
@@ -285,9 +272,8 @@ button.secondary:hover {
 .compare-btn-active { background: rgba(0,255,65,0.1); color: var(--primary); border-color: var(--primary); }
 .compare-btn-active:hover { background: var(--primary); color: #000; }
 
-/* ═══════════════════════════════════════════════════════════════
-   PRODUCT PAGE
-   ═══════════════════════════════════════════════════════════════ */
+
+
 .product-detail {
   display: flex;
   gap: 28px;
@@ -307,7 +293,6 @@ button.secondary:hover {
 #specsTable td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--text); }
 .spec-label { font-weight: 600; width: 40%; color: var(--primary-dim); }
 
-/* ── REVIEWS ──────────────────────────────────────────────────── */
 .review-item {
   border-bottom: 1px solid var(--border);
   padding: 12px 0;
@@ -324,9 +309,8 @@ button.secondary:hover {
 .review-date   { color: var(--text-dim); font-size: 0.82rem; margin-left: auto; }
 .review-delete { font-size: 0.78rem; padding: 3px 10px; letter-spacing: 0; }
 
-/* ═══════════════════════════════════════════════════════════════
-   CART
-   ═══════════════════════════════════════════════════════════════ */
+
+
 .cart-row {
   display: flex;
   align-items: center;
@@ -343,9 +327,8 @@ button.secondary:hover {
 }
 .cart-row-info { flex: 1; }
 
-/* ═══════════════════════════════════════════════════════════════
-   PROFILE — ORDERS
-   ═══════════════════════════════════════════════════════════════ */
+
+
 .order-item-row {
   padding: 8px 0;
   border-bottom: 1px solid rgba(0,255,65,0.08);
@@ -378,9 +361,8 @@ button.secondary:hover {
   box-shadow: 0 0 8px var(--glow);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   ADMIN
-   ═══════════════════════════════════════════════════════════════ */
+
+
 .admin-tabs  { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
 
 .admin-tab {
@@ -441,9 +423,8 @@ table.admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; 
 .metric-val   { font-family: 'Orbitron', monospace; font-size: 2rem; font-weight: 700; color: var(--primary); text-shadow: 0 0 12px var(--glow); }
 .metric-label { font-size: 0.78rem; color: var(--text-dim); margin-top: 4px; }
 
-/* ═══════════════════════════════════════════════════════════════
-   COMPARE
-   ═══════════════════════════════════════════════════════════════ */
+
+
 .compare-table-wrap { overflow-x: auto; }
 .compare-table { width: 100%; border-collapse: collapse; min-width: 500px; }
 .compare-table th, .compare-table td {
@@ -475,15 +456,13 @@ table.admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; 
 .spec-missing { color: var(--text-dim); font-style: italic; }
 .compare-rating { color: var(--primary); }
 
-/* ═══════════════════════════════════════════════════════════════
-   SCROLLBAR
-   ═══════════════════════════════════════════════════════════════ */
+
+
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--primary-dim); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
-/* ═══════════════════════════════════════════════════════════════
-   SELECTION
-   ═══════════════════════════════════════════════════════════════ */
+
+
 ::selection { background: rgba(0,255,65,0.25); color: var(--primary); }

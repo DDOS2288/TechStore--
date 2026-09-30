@@ -1,4 +1,5 @@
-import { db } from "./firebase-config.js";
+import { db } from "./firebase/firebase-config.js";
+import { watchAuthState, logoutUser } from "./firebase/auth.js";
 import {
   collection,
   query,
@@ -8,6 +9,30 @@ import {
   startAfter,
   getDocs,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const nav = document.getElementById("nav");
+
+watchAuthState((user, profile) => {
+  if (!nav) return;
+  if (!user) {
+    nav.innerHTML = `<a href="login.html">Вход</a><a href="register.html">Регистрация</a>`;
+    return;
+  }
+
+  const adminLink = profile?.role === "admin" ? `<a href="admin.html">Админ-панель</a>` : "";
+  nav.innerHTML = `
+    <a href="cart.html">Корзина</a>
+    <a href="profile.html">Личный кабинет</a>
+    ${adminLink}
+    <a href="#" id="logoutLink">Выйти</a>
+  `;
+
+  document.getElementById("logoutLink")?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await logoutUser();
+    window.location.reload();
+  });
+});
 
 const PAGE_SIZE = 8;
 

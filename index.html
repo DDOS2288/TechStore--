@@ -27,10 +27,13 @@
   }
 </script>
 
-
 <header>
   <a class="logo" href="index.html">TechStore</a>
-  <nav id="nav"></nav>
+  <nav id="nav">
+    <a href="cart.html">Корзина</a>
+    <a href="profile.html">Личный кабинет</a>
+    <a href="login.html">Вход</a>
+  </nav>
 </header>
 
 <main>
@@ -58,37 +61,8 @@
   <button id="loadMoreBtn" class="secondary hidden">Показать ещё</button>
 </main>
 
-<script type="module">
-  import { watchAuthState, logoutUser } from "./js/auth.js";
-
-  const nav = document.getElementById("nav");
-
-  watchAuthState((user, profile) => {
-    if (!user) {
-      nav.innerHTML = `<a href="login.html">Вход</a><a href="register.html">Регистрация</a>`;
-      return;
-    }
-
-    const adminLink = profile?.role === "admin" ? `<a href="admin.html">Админ-панель</a>` : "";
-    nav.innerHTML = `
-      <a href="cart.html">Корзина</a>
-      <a href="profile.html">Личный кабинет</a>
-      ${adminLink}
-      <a href="#" id="logoutLink">Выйти</a>
-    `;
-
-    document.getElementById("logoutLink").addEventListener("click", async (e) => {
-      e.preventDefault();
-      await logoutUser();
-      window.location.reload();
-    });
-  });
-</script>
-
 <script type="module" src="js/catalog.js"></script>
 <script src="js/matrix.js"></script>
 
 </body>
 </html>
-
-

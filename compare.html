@@ -4,7 +4,6 @@
 <meta charset="UTF-8" />
 <title>Сравнение товаров — TechStore</title>
 <link rel="stylesheet" href="css/style.css" />
-
 </head>
 <body>
 <script>
@@ -21,7 +20,10 @@
 
 <header>
   <a class="logo" href="index.html">TechStore</a>
-  <nav id="nav"></nav>
+  <nav id="nav">
+    <a href="index.html">Каталог</a>
+    <a href="cart.html">Корзина</a>
+  </nav>
 </header>
 
 <main>
@@ -36,138 +38,7 @@
   </div>
 </main>
 
-<script type="module">
-  import { db } from "./js/firebase-config.js";
-  import { watchAuthState, logoutUser } from "./js/auth.js";
-  import {
-    doc, getDoc,
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-  // ---------- NAV ----------
-  watchAuthState((user, profile) => {
-    const nav = document.getElementById("nav");
-    if (!user) {
-      nav.innerHTML = `<a href="index.html">Каталог</a><a href="login.html">Вход</a><a href="register.html">Регистрация</a>`;
-      return;
-    }
-    const adminLink = profile?.role === "admin" ? `<a href="admin.html">Админ-панель</a>` : "";
-    nav.innerHTML = `<a href="index.html">Каталог</a><a href="cart.html">Корзина</a><a href="profile.html">Профиль</a>${adminLink}<a href="#" id="logoutLink">Выйти</a>`;
-    document.getElementById("logoutLink").addEventListener("click", async (e) => {
-      e.preventDefault(); await logoutUser(); window.location.reload();
-    });
-  });
-
-  // ---------- ЗАГРУЗКА ----------
-  function getIds() {
-    return JSON.parse(localStorage.getItem("compareIds") || "[]");
-  }
-  function removeId(id) {
-    const ids = getIds().filter(x => x !== id);
-    localStorage.setItem("compareIds", JSON.stringify(ids));
-    renderCompare();
-  }
-
-  async function renderCompare() {
-    const ids = getIds();
-    const container = document.getElementById("compareContent");
-    const emptyMsg = document.getElementById("emptyMsg");
-
-    if (ids.length === 0) {
-      container.innerHTML = `
-        <div class="compare-empty">
-          <p style="font-size:1.1rem;">Нет товаров для сравнения.</p>
-          <a href="index.html">← Добавьте товары из каталога</a>
-        </div>`;
-      return;
-    }
-
-    // Загружаем все товары параллельно
-    const docs = await Promise.all(ids.map(id => getDoc(doc(db, "products", id))));
-    const products = docs
-      .filter(d => d.exists())
-      .map(d => ({ id: d.id, ...d.data() }));
-
-    if (products.length === 0) {
-      localStorage.removeItem("compareIds");
-      container.innerHTML = `<div class="compare-empty"><p>Товары не найдены.</p><a href="index.html">← В каталог</a></div>`;
-      return;
-    }
-
-    // Собираем все ключи specs
-    const allSpecKeys = [...new Set(products.flatMap(p => Object.keys(p.specs || {})))];
-
-    // Строим таблицу
-    let html = `<div class="card compare-table-wrap"><table class="compare-table">`;
-
-    // Шапка — фото + название + цена + кнопка удалить
-    html += `<thead><tr><th class="row-label">Товар</th>`;
-    products.forEach(p => {
-      html += `
-        <td class="compare-header-cell">
-          <img src="${p.images?.[0] || 'https://placehold.co/120x120?text=No+Image'}" alt="${p.name}" />
-          <div class="product-name">${p.name}</div>
-          <div class="product-price">${p.price?.toLocaleString("ru-RU")} ₸</div>
-          <button class="remove-compare" data-id="${p.id}">✕ Убрать</button>
-        </td>`;
-    });
-    html += `</tr></thead><tbody>`;
-
-    // Строка: Рейтинг
-    html += `<tr><th class="row-label">Рейтинг</th>`;
-    products.forEach(p => {
-      html += `<td class="compare-rating">★ ${p.rating?.toFixed(1) || "—"} <span style="color:#4a664a;font-size:0.85rem;">(${p.reviewsCount || 0})</span></td>`;
-    });
-    html += `</tr>`;
-
-    // Строка: Наличие
-    html += `<tr><th class="row-label">В наличии</th>`;
-    products.forEach(p => {
-      html += `<td>${p.inStock ? "✅ Да" : "❌ Нет"}</td>`;
-    });
-    html += `</tr>`;
-
-    // Строка: Категория
-    html += `<tr><th class="row-label">Категория</th>`;
-    products.forEach(p => {
-      html += `<td>${p.categoryName || "—"}</td>`;
-    });
-    html += `</tr>`;
-
-    // Строки: Характеристики
-    allSpecKeys.forEach(key => {
-      // Подсветить строку если значения отличаются
-      const values = products.map(p => p.specs?.[key] ?? null);
-      const allSame = values.every(v => v === values[0]);
-
-      html += `<tr${!allSame ? ' class="diff-highlight"' : ""}><th class="row-label">${key}</th>`;
-      products.forEach(p => {
-        const val = p.specs?.[key];
-        html += `<td>${val !== undefined ? val : '<span class="spec-missing">—</span>'}</td>`;
-      });
-      html += `</tr>`;
-    });
-
-    // Строка: Кнопка "В корзину"
-    html += `<tr><th class="row-label"></th>`;
-    products.forEach(p => {
-      html += `<td><a href="product.html?id=${p.id}" style="display:inline-block;padding:7px 14px;background:transparent;color:#00ff41;border:1px solid #00ff41;border-radius:6px;text-decoration:none;font-size:0.85rem;font-weight:700;font-family:'Share Tech Mono',monospace;">Подробнее →</a></td>`;
-    });
-    html += `</tr>`;
-
-    html += `</tbody></table></div>`;
-    html += `<p style="color:#4a664a;font-size:0.82rem;">// строки выделенные жёлтым — характеристики отличаются</p>`;
-
-    container.innerHTML = html;
-
-    // Кнопки удаления из сравнения
-    container.querySelectorAll(".remove-compare").forEach(btn => {
-      btn.addEventListener("click", () => removeId(btn.dataset.id));
-    });
-  }
-
-  renderCompare();
-</script>
-
+<script type="module" src="js/compare.js"></script>
 <script src="js/matrix.js"></script>
 </body>
 </html>
